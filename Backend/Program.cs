@@ -22,8 +22,19 @@ app.MapGet("/api/tasks", () => tasks);
 app.MapPost("/api/tasks", (TaskItem task) =>
 {
     task.Id = nextId++;
+    task.IsCompleted = false;
     tasks.Add(task);
     return task;
+});
+
+app.MapPut("/api/tasks/{id}/toggle", (int id) =>
+{
+    var task = tasks.FirstOrDefault(t => t.Id == id);
+    if (task == null)
+        return Results.NotFound();
+    
+    task.IsCompleted = !task.IsCompleted;
+    return Results.Ok(task);
 });
 
 app.MapDelete("/api/tasks/{id}", (int id) =>
@@ -41,5 +52,6 @@ app.Run();
 public class TaskItem
 {
     public int Id { get; set; }
-    public string Title { get; set; }
+    public required string Title { get; set; }
+    public bool IsCompleted { get; set; }
 }

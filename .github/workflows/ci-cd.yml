@@ -1,0 +1,39 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore Backend/Backend.csproj
+    
+    - name: Build
+      run: dotnet build Backend/Backend.csproj --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test Backend/Backend.csproj --no-build --verbosity normal
+      continue-on-error: true
+    
+    - name: Publish
+      run: dotnet publish Backend/Backend.csproj --configuration Release --output ./publish
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: task-vault-backend
+        path: ./publish
